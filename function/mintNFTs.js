@@ -16,58 +16,43 @@ async function main() {
     web3.eth.defaultAccount = account.address;
 
     // Contract address and ABI
-    const contractAddress = process.env.CONTRACT_ADDRESS;
+    const contractAddress = process.env.NFT_CONTRACT;
     const abi = [
       {
         inputs: [
           {
-            internalType: "uint256",
-            name: "totalTickets",
-            type: "uint256",
+            internalType: "uint256[]",
+            name: "tokenId",
+            type: "uint256[]",
           },
           {
-            internalType: "uint256",
-            name: "mintPrice",
-            type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "tag",
-            type: "string",
+            internalType: "string[]",
+            name: "_newCID",
+            type: "string[]",
           },
         ],
-        name: "createTicket",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
+        name: "addTokenUriForNft",
+        outputs: [],
         stateMutability: "nonpayable",
         type: "function",
       },
     ];
+    console.log("NFT Contract Address: ", contractAddress);
     // Instantiate the contract
     const contract = new web3.eth.Contract(abi, contractAddress);
     // Transaction details
-    const totalTickets = 1000;
-    const mintPrice = 500000;
-    const name = "POLO_TICKET";
-    const tag = "PTKT";
+    const tokenId = [1, 2, 3];
+    const _newCID = [
+      "https://tickting.com/1",
+      "https://tickting.com/2",
+      "https://tickting.com/3",
+    ];
     const tx = {
       from: account.address,
       to: contractAddress,
-      data: contract.methods
-        .createTicket(totalTickets, mintPrice, name, tag)
-        .encodeABI(),
+      data: contract.methods.addTokenUriForNft(tokenId, _newCID).encodeABI(),
       gas: await contract.methods
-        .createTicket(totalTickets, mintPrice, name, tag)
+        .addTokenUriForNft(tokenId, _newCID)
         .estimateGas({ from: account.address }),
       gasPrice: (await web3.eth.getGasPrice()) * 2,
     };
@@ -77,7 +62,7 @@ async function main() {
       signedTx.rawTransaction
     );
 
-    console.log("Transaction NFT Created:", receipt.transactionHash);
+    console.log("Transaction NFT Minted:", receipt.transactionHash);
     console.log("Transction Receipt: ", receipt);
   } catch (error) {
     console.error("Error performing transaction:", error);
